@@ -37,7 +37,8 @@ namespace Plugin.Geolocator
             DesiredAccuracy = 100;
         }
 
-        string[] Providers => Manager.GetProviders(enabledOnly: false).ToArray();
+		string[] AllowedProviders = { LocationManager.GpsProvider };
+        string[] Providers => Manager.GetProviders(enabledOnly: false).Where(p => AllowedProviders.Contains(p)).ToArray();
         string[] IgnoredProviders => new string[] { LocationManager.PassiveProvider, "local_database" };
 
         LocationManager Manager
@@ -91,6 +92,9 @@ namespace Plugin.Geolocator
             Location bestLocation = null;
             foreach (var provider in Providers)
             {
+                if(!AllowedProviders.Contains(provider)) {
+                    continue;
+                }
                 var location = Manager.GetLastKnownLocation(provider);
                 if (location != null && GeolocationUtils.IsBetterLocation(location, bestLocation))
                     bestLocation = location;
